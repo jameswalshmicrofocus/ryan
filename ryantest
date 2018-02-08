@@ -1,0 +1,97 @@
+logo
+DOWNLOAD
+GETTING STARTED
+MEMBERS
+PROJECTS
+MORE
+Bugzilla – Bug 339781	EGit should recover from "cannot lock index" if possible.	Last modified: 2016-06-21 08:50:47 EDT
+Home | New | Browse | Search |  
+  Search [?] | Reports | Requests | Help | Log In | Terms of Use | Copyright Agent
+Bug 339781 - EGit should recover from "cannot lock index" if possible.
+Status:	NEW
+Alias:	None
+Product:	EGit
+Component:	UI (show other bugs)
+Version:	0.11
+Hardware:	PC Windows 7
+Importance:	P3 normal (vote)
+Target Milestone:	---
+Assignee:	Project Inbox CLA Friend
+QA Contact:	
+URL:	
+Whiteboard:	
+Keywords:	
+Duplicates (1):	360141 (view as bug list)
+Depends on:	
+Blocks:	
+ 
+Reported:	2011-03-12 03:38 EST by Gunnar Wagenknecht CLA Friend
+Modified:	2016-06-21 08:50 EDT (History)
+CC List:	6 users (show)
+See Also:	
+
+Attachments
+Add an attachment (proposed patch, testcase, etc.)
+
+Note
+You need to log in before you can comment on or make changes to this bug.
+Description Gunnar Wagenknecht CLA Friend 2011-03-12 03:38:36 EST
+Eclipse 3.7M6
+EGit 0.11.3
+
+
+I have on project in my workspace from an Eclipse Git mirror 
+(cloned from git://dev.eclipse.org/org.eclipse.pde/build.git)
+
+I only update the repo occasionally and today was one of those days. ;) I right clicked the repo and performed "Fetch" but then I realized that I wanted a "pull". Thus I right clicked again and selected "Pull". The fetch was still in progress but I think there are proper scheduling rules in place which prevent both operations from executing at the same time.
+
+The pull operation failed with the message below. Even after a restart of Eclipse the pull operation still fails with the same exception.
+
+
+---------------------------------------------------
+eclipse.buildId=I20110310-1119
+java.version=1.6.0_23
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=de_DE
+Command-line arguments:  -os win32 -ws win32 -arch x86
+
+
+Error
+Sat Mar 12 09:23:52 CET 2011
+Exception caught during execution of merge command. java.io.IOException: Cannot lock D:\Development\eclipse\pde\build.git\.git\index
+
+org.eclipse.jgit.api.errors.JGitInternalException: Exception caught during execution of merge command. java.io.IOException: Cannot lock D:\Development\eclipse\pde\build.git\.git\index
+at org.eclipse.jgit.api.MergeCommand.call(MergeCommand.java:243)
+at org.eclipse.jgit.api.PullCommand.call(PullCommand.java:285)
+at org.eclipse.egit.core.op.PullOperation$1.run(PullOperation.java:68)
+at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2310)
+at org.eclipse.core.internal.resources.Workspace.run(Workspace.java:2292)
+at org.eclipse.egit.core.op.PullOperation.execute(PullOperation.java:77)
+at org.eclipse.egit.ui.internal.actions.PullFromUpstreamActionHandler$1.run(PullFromUpstreamActionHandler.java:66)
+at org.eclipse.core.internal.jobs.Worker.run(Worker.java:54)
+Caused by: java.io.IOException: Cannot lock D:\Development\eclipse\pde\build.git\.git\index
+at org.eclipse.jgit.dircache.DirCache.lock(DirCache.java:187)
+at org.eclipse.jgit.lib.Repository.lockDirCache(Repository.java:932)
+at org.eclipse.jgit.api.MergeCommand.call(MergeCommand.java:179)
+... 7 more
+---------------------------------------------------
+
+
+Running git on the command line gave the following message:
+---------------------------------------------------
+fatal: Unable to create '.../.git/index.lock': File exists.
+
+If no other git process is currently running, this probably means a
+git process crashed in this repository earlier. Make sure no other git
+process is running and remove the file manually to continue.
+---------------------------------------------------
+
+
+It seems that this is the case. After deleting the file manually I was able to successfully pull in EGit.
+
+I think that EGit can do better. Instead of showing the error dialog the IOException could be a special lock failed/lock file exists exception which would bring up a dialog with a similar message and a "recover/try again" button  or so. EGit could also perform some checks/cleanups on the index (in case it really crashed).
+Comment 1 Markus Keller CLA Friend 2012-06-18 09:32:34 EDT
+*** Bug 360141 has been marked as a duplicate of this bug. ***
+Format For Printing  - XML  - Clone This Bug  - Top of page
+Home | New | Browse | Search |  
+  Search [?] | Reports | Requests | Help | Log In | Terms of Use | Copyright Agent
